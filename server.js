@@ -1,13 +1,24 @@
-const express = require('express');
-const app = express();
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 
-// Endpoint utama
-app.get('/', (req, res) => {
-  res.send('✅ WhatsApp Bot Aktif!');
+const client = new Client({
+    authStrategy: new LocalAuth(),
+    puppeteer: { headless: true }
 });
 
-// Jalankan server di port Railway atau default (3000)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Express server berjalan di port ${PORT}`);
+client.on('qr', qr => {
+    console.log('Scan QR ini dengan WhatsApp kamu:');
+    qrcode.generate(qr, { small: true });
 });
+
+client.on('ready', () => {
+    console.log('✅ Bot siap digunakan!');
+});
+
+client.on('message', message => {
+    if (message.body.toLowerCase() === 'hai') {
+        message.reply('Hai juga! Ada yang bisa saya bantu?');
+    }
+});
+
+client.initialize();
